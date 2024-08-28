@@ -32,6 +32,7 @@ var _contextOptionKey = &QueryOptions{
 }
 
 type Settings map[string]interface{}
+type Parameters map[string]string
 type (
 	QueryOption  func(*QueryOptions) error
 	QueryOptions struct {
@@ -43,13 +44,15 @@ type (
 		queryID  string
 		quotaKey string
 		events   struct {
-			logs          func(*Log)
-			progress      func(*Progress)
-			profileInfo   func(*ProfileInfo)
-			profileEvents func([]ProfileEvent)
+			logs           func(*Log)
+			progress       func(*Progress)
+			profileInfo    func(*ProfileInfo)
+			profileEvents  func([]ProfileEvent)
+			receiveQueryID func(string)
 		}
-		settings Settings
-		external []*external.Table
+		settings   Settings
+		parameters Parameters
+		external   []*external.Table
 	}
 )
 
@@ -81,6 +84,13 @@ func WithSettings(settings Settings) QueryOption {
 	}
 }
 
+func WithParameters(params Parameters) QueryOption {
+	return func(o *QueryOptions) error {
+		o.parameters = params
+		return nil
+	}
+}
+
 func WithLogs(fn func(*Log)) QueryOption {
 	return func(o *QueryOptions) error {
 		o.events.logs = fn
@@ -105,6 +115,13 @@ func WithProfileInfo(fn func(*ProfileInfo)) QueryOption {
 func WithProfileEvents(fn func([]ProfileEvent)) QueryOption {
 	return func(o *QueryOptions) error {
 		o.events.profileEvents = fn
+		return nil
+	}
+}
+
+func WithReceiveQueryID(fn func(string)) QueryOption {
+	return func(o *QueryOptions) error {
+		o.events.receiveQueryID = fn
 		return nil
 	}
 }
@@ -169,6 +186,11 @@ func (q *QueryOptions) onProcess() *onProcess {
 		profileEvents: func(events []ProfileEvent) {
 			if q.events.profileEvents != nil {
 				q.events.profileEvents(events)
+			}
+		},
+		receiveQueryID: func(queryID string) {
+			if q.events.receiveQueryID != nil {
+				q.events.receiveQueryID(queryID)
 			}
 		},
 	}
