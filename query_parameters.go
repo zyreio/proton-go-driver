@@ -19,9 +19,10 @@ package proton
 
 import (
 	"errors"
-	"github.com/timeplus-io/proton-go-driver/v2/lib/driver"
 	"regexp"
 	"time"
+
+	"github.com/timeplus-io/proton-go-driver/v2/lib/driver"
 )
 
 var (

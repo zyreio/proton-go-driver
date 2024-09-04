@@ -146,12 +146,12 @@ func (ch *proton) PrepareBatch(ctx context.Context, query string) (driver.Batch,
 	return conn.prepareBatch(ctx, query, ch.release)
 }
 
-func (ch *proton) AsyncInsert(ctx context.Context, query string, wait bool) error {
+func (ch *proton) AsyncInsert(ctx context.Context, query string, wait bool, args ...any) error {
 	conn, err := ch.acquire(ctx)
 	if err != nil {
 		return err
 	}
-	if err := conn.asyncInsert(ctx, query, wait); err != nil {
+	if err := conn.asyncInsert(ctx, query, wait, args...); err != nil {
 		ch.release(conn, err)
 		return err
 	}
